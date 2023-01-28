@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./data/data.db"
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  firstName String
+  lastName  String
+  backupMac String @unique
+}
+
+model Credential {
+  id        Int               @id @default(autoincrement())
+  domain    String
+  name      String            @default("")
+  username  String            @unique
+  password  String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  uses      CredentialUsage[]
+}
+
+model Device {
+  id         Int               @id @default(autoincrement())
+  name       String
+  mac        String            @unique
+  createdAt  DateTime          @default(now())
+  lastUsedAt DateTime          @default(now())
+  uses       CredentialUsage[]
+}
+
+model CredentialUsage {
+  id           Int        @id @default(autoincrement())
+  credential   Credential @relation(fields: [credentialId], references: [id])
+  device       Device     @relation(fields: [deviceId], references: [id])
+  createdAt    DateTime   @default(now())
+  credentialId Int
+  deviceId     Int
+}
