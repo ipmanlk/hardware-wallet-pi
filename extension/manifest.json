@@ -1,0 +1,20 @@
+{
+  "description": "Extension for hardware wallet",
+  "manifest_version": 2,
+  "name": "Wallet",
+  "version": "1.0",
+  "homepage_url": "https://www.navinda.xyz",
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file:///*"],
+      "js": ["wallet.js"],
+      "run_at": "document_end"
+    }
+  ],
+
+  "permissions": ["http://*/*", "https://*/*"]
+}
