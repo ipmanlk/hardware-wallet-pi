@@ -6,18 +6,22 @@ const SCRIPT_PATH = "/usr/share/doc/python3-fingerprint/examples";
 
 const REGISTER_SCRIPT = `${SCRIPT_PATH}/example_enroll.py`;
 const DOWNLOAD_SCRIPT = `${SCRIPT_PATH}/example_downloadimage.py`;
+const SCAN_SUCCESS_MSG = "enrolled successfully";
 
 export class FingerprintService {
   static async register() {
-    while (true) {
-      try {
-        let scanData = "";
+    let scanData = "";
 
+    while (!scanData.includes(SCAN_SUCCESS_MSG)) {
+      try {
         await ExecutionService.execute({
           scriptPath: REGISTER_SCRIPT,
           callbacks: {
             onData: (params) => {
-              if (params.data.toString().includes("enrolled successfully")) {
+              console.log(params.data.toString());
+              if (params.data.toString().includes(SCAN_SUCCESS_MSG)) {
+                console.log("done");
+                scanData = params.data.toString();
                 params.script.kill();
                 params.resolve(params.data);
               }
@@ -27,7 +31,8 @@ export class FingerprintService {
             },
             onClose: (params) => {
               params.resolve(params.data);
-              scanData = params.data.toString();
+              if (params.data.toString()?.trim())
+                scanData = params.data.toString();
             },
           },
         });
@@ -44,11 +49,15 @@ export class FingerprintService {
         });
 
         // move and rename to position
-        const filePath = "/tmp/fingerprint.bmp";
-        await copyFile(filePath, `/tmp/${scanData}.bmp`);
+        // const filePath = "/tmp/fingerprint.bmp";
+        // await copyFile(filePath, `/tmp/${scanData}.bmp`);
 
-        return scanData;
+        console.log("scanData is", scanData);
       } catch {}
     }
+
+    return {
+      scanData,
+    };
   }
 }

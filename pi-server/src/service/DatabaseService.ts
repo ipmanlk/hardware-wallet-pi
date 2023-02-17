@@ -14,7 +14,9 @@ export class DatabaseService {
 		const stmt = db.prepare(
 			"INSERT INTO User(firstName, lastName, backupMac) VALUES(@firstName, @lastName, @backupMac)"
 		);
+		const info = stmt.run(user);
 
-		stmt.run(user);
+		const selectStmt = db.prepare("SELECT * FROM User WHERE id = ?");
+		return selectStmt.get(info.lastInsertRowid);
 	}
 }

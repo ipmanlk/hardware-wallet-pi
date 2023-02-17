@@ -33,7 +33,7 @@ export class ExecutionService {
 
       script.on("close", (code: number) => {
         if (code !== 0) {
-          reject(new Error(`child process exited with code ${code}`));
+          resolve(`Error: ${code} ${stdout}`);
         } else {
           resolve(stdout);
         }
