@@ -11,4 +11,12 @@ export class AuthController {
 
     return res.json(dbData);
   }
+
+  static async login(req: Request, res: Response) {
+    const data = await FingerprintService.login();
+
+    return res.json({
+      data,
+    });
+  }
 }
