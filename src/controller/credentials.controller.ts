@@ -15,6 +15,6 @@ export class CredentialsController {
       req.query.domain as string
     );
 
-    return res.json({ data: dbCredentials });
+    return res.json({ found: !!dbCredentials, data: dbCredentials });
   }
 }
