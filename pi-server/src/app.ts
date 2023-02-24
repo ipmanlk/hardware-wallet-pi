@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { AuthController } from "./controller/auth.controller";
+import { DatabaseService } from "./service/DatabaseService";
 
 const app = express();
 app.use(cors());
@@ -16,6 +17,8 @@ app.post("/register", (req, res) => AuthController.register(req, res));
 
 app.post("/login", (req, res) => AuthController.login(req, res));
 
-app.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`);
+DatabaseService.initializeDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server listening at http://localhost:${PORT}`);
+  });
 });
