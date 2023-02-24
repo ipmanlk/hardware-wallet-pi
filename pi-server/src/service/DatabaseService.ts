@@ -21,9 +21,14 @@ export type Device = {
 export class DatabaseService {
   static async createUser(data: CreateUserData): Promise<DBUser> {
     const stmt = db.prepare(
-      "INSERT INTO User(firstName, lastName, backupMac) VALUES(@firstName, @lastName, @backupMac)"
+      "INSERT INTO User(firstName, lastName, backupMac, createdAt) VALUES(@firstName, @lastName, @backupMac, @createdAt)"
     );
-    const info = stmt.run(data);
+
+    const info = stmt.run({
+      ...data,
+      createdAt: new Date().toISOString(),
+      backupMac: data.backupMac ? data.backupMac : null,
+    });
 
     const selectStmt = db.prepare("SELECT * FROM User WHERE id = ?");
     return selectStmt.get(info.lastInsertRowid);
@@ -36,9 +41,13 @@ export class DatabaseService {
 
   static async createDevice(data: CreateDeviceData): Promise<DBDevice> {
     const stmt = db.prepare(
-      "INSERT INTO Device(name, mac) VALUES(@name, @mac)"
+      "INSERT INTO Device(name, mac) VALUES(@name, @mac, @createdAt, @lastUsedAt)"
     );
-    const info = stmt.run(data);
+    const info = stmt.run({
+      ...data,
+      createdAt: new Date().toISOString(),
+      lastUsedAt: new Date().toISOString(),
+    });
 
     const selectStmt = db.prepare("SELECT * FROM Device WHERE id = ?");
     return selectStmt.get(info.lastInsertRowid);
@@ -53,12 +62,21 @@ export class DatabaseService {
     data: CreateCredentialData
   ): Promise<DBCredential> {
     const stmt = db.prepare(
-      "INSERT INTO Credential(domain, name, username, password) VALUES(@domain, @name, @username, @password)"
+      "INSERT INTO Credential(domain, name, username, password, createdAt, updatedAt) VALUES(@domain, @name, @username, @password, @createdAt, @updatedAt)"
     );
-    const info = stmt.run(data);
+    const info = stmt.run({
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
 
     const selectStmt = db.prepare("SELECT * FROM Credential WHERE id = ?");
-    return selectStmt.get(info.lastInsertRowid);
+    const newRecord = selectStmt.get(info.lastInsertRowid);
+
+    return {
+      ...newRecord,
+      password: "********",
+    };
   }
 
   static async getCredentialsByDomain(domain: string): Promise<DBCredential> {
@@ -72,7 +90,10 @@ export class DatabaseService {
     const stmt = db.prepare(
       "INSERT INTO CredentialUsage(deviceId, credentialId, usedAt) VALUES(@deviceId, @credentialId, @usedAt)"
     );
-    const info = stmt.run(data);
+    const info = stmt.run({
+      ...data,
+      usedAt: new Date().toISOString(),
+    });
 
     const selectStmt = db.prepare("SELECT * FROM CredentialUsage WHERE id = ?");
     return selectStmt.get(info.lastInsertRowid);

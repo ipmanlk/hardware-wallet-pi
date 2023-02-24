@@ -1,8 +1,7 @@
 export type CreateUserData = {
-  id: number;
   firstName: string;
   lastName: string;
-  backupMac?: string;
+  backupMac: string | null;
 };
 
 export type DBUser = CreateUserData & { id: number; createdAt: Date };
@@ -16,8 +15,8 @@ export type CreateCredentialData = {
 
 export type DBCredential = CreateCredentialData & {
   id: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CreateDeviceData = {
@@ -27,14 +26,14 @@ export type CreateDeviceData = {
 
 export type DBDevice = CreateDeviceData & {
   id: number;
-  createdAt: Date;
-  lastUsedAt: Date;
+  createdAt: string;
+  lastUsedAt: string;
 };
 
 export type CreateCredentialUsageData = {
   deviceId: number;
   credentialId: number;
-  usedAt: Date;
+  usedAt: string;
 };
 
 export type DBCredentialUsage = CreateCredentialUsageData & {

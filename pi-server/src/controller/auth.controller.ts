@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { DatabaseService, User } from "../service/DatabaseService";
+import { DatabaseService } from "../service/DatabaseService";
 import { FingerprintService } from "../service/FingerprintService";
 import { InitialRegistrationData } from "../types";
 
