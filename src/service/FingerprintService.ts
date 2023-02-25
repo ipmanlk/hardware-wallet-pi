@@ -1,11 +1,10 @@
-import { spawn } from "child_process";
-import { copyFile } from "fs/promises";
 import { ExecutionService } from "./ExecutionService";
 
 const SCRIPT_PATH = "/usr/share/doc/python3-fingerprint/examples";
 
 const REGISTER_SCRIPT = `${SCRIPT_PATH}/example_enroll.py`;
 const DOWNLOAD_SCRIPT = `${SCRIPT_PATH}/example_downloadimage.py`;
+const DELETE_SCRIPT = `${SCRIPT_PATH}/example_delete_all.py`;
 const SCAN_SCRIPT = `${SCRIPT_PATH}/example_search.py`;
 const REGISTER_SUCCESS_MSG = "enrolled successfully";
 const SCAN_SUCCESS_MSG = "Found template at position";
@@ -98,5 +97,26 @@ export class FingerprintService {
     return {
       scanData: loginData,
     };
+  }
+
+  static async deleteAll() {
+    try {
+      await ExecutionService.execute({
+        scriptPath: DELETE_SCRIPT,
+        callbacks: {
+          onData: (params) => {
+            console.log(params.data.toString());
+          },
+          onError: (params) => {
+            params.reject(params.data);
+          },
+          onClose: (params) => {
+            params.resolve(params.data);
+          },
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 }

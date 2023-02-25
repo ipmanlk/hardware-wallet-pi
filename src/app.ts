@@ -6,6 +6,7 @@ import { CredentialsController } from "./controller/credentials.controller";
 import https from "https";
 import fs from "fs";
 import { CERT_DIR } from "./constants";
+import { DeviceController } from "./controller/device.controller";
 
 const PORT = 3000;
 const privateKey = fs.readFileSync(`${CERT_DIR}/key.pem`, "utf8");
@@ -42,6 +43,10 @@ app.post("/credentials", (req, res) =>
 app.get("/credentials", (req, res) =>
   CredentialsController.getCredentialByDomain(req, res)
 );
+
+app.post("/device/reset", (req, res) => {
+  DeviceController.resetDevice(req, res);
+});
 
 DatabaseService.initializeDb().then(() => {
   server.listen(PORT, () => {
