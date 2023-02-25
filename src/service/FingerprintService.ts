@@ -91,17 +91,6 @@ export class FingerprintService {
           },
         });
 
-        await ExecutionService.execute({
-          scriptPath: DOWNLOAD_SCRIPT,
-          callbacks: {
-            onData: () => {},
-            onError: () => {},
-            onClose: (params) => {
-              params.resolve(params.data);
-            },
-          },
-        });
-
         console.log("scanData is", loginData);
       } catch {}
     }
