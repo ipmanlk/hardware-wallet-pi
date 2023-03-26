@@ -25,4 +25,24 @@ export class CredentialsController {
 
     return res.json({ found: !!dbCredential, data: decryptedCredentials });
   }
+
+  static async getCredentials(req: Request, res: Response) {
+    const dbCredentials = await DatabaseService.getCredentials();
+
+    return res.json({
+      data: dbCredentials.map((c) => {
+        const decryptedCredential = CredentialUtil.decryptCredential(c);
+        return {
+          ...decryptedCredential,
+          password: "********",
+        };
+      }),
+    });
+  }
+
+  static async deleteCredential(req: Request, res: Response) {
+    const id = +req.params.id;
+    await DatabaseService.deleteCredentialById(id);
+    return res.json({ message: "Credential deleted" });
+  }
 }

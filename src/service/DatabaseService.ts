@@ -82,9 +82,19 @@ export class DatabaseService {
     };
   }
 
+  static async getCredentials(): Promise<DBCredential[]> {
+    const stmt = this.db.prepare("SELECT * FROM Credential");
+    return stmt.all();
+  }
+
   static async getCredentialsByDomain(domain: string): Promise<DBCredential> {
     const stmt = this.db.prepare("SELECT * FROM Credential WHERE domain = ?");
     return stmt.get(domain);
+  }
+
+  static deleteCredentialById(id: number): DBCredential {
+    const stmt = this.db.prepare("DELETE FROM Credential WHERE id = ?");
+    return stmt.get(id);
   }
 
   static async createCredentialUsage(

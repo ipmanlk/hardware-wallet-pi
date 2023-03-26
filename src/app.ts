@@ -38,7 +38,15 @@ app.post("/credentials", (req, res) =>
 );
 
 app.get("/credentials", (req, res) =>
+  CredentialsController.getCredentials(req, res)
+);
+
+app.get("/credential-by-domain", (req, res) =>
   CredentialsController.getCredentialByDomain(req, res)
+);
+
+app.delete("/credentials/:id", (req, res) =>
+  CredentialsController.deleteCredential(req, res)
 );
 
 app.get("/device/status", (req, res) =>
