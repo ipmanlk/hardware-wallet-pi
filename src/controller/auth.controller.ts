@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
+import { writeFile } from "fs/promises";
+import { WALLET_BACKUP_KEY_PATH } from "../constants";
 import { DatabaseService } from "../service/DatabaseService";
 import { FingerprintService } from "../service/FingerprintService";
 import { InitialRegistrationData } from "../types";
+import { CommonUtil } from "../util/CommonUtil";
 
 export class AuthController {
   static async getDeviceStatus(req: Request, res: Response) {
@@ -30,7 +33,19 @@ export class AuthController {
     const data = req.body as InitialRegistrationData;
     const dbUser = await DatabaseService.createUser(data.user);
 
-    return res.json({ data: dbUser });
+    const backupKey = CommonUtil.getRandomString();
+    const walletKey = backupKey.slice(0, 5);
+    const clientKey = backupKey.slice(5);
+
+    await writeFile(WALLET_BACKUP_KEY_PATH, walletKey);
+
+    return res.json({
+      data: {
+        ...dbUser,
+        walletKey,
+        clientKey,
+      },
+    });
   }
 
   static async login(req: Request, res: Response) {

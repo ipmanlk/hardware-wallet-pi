@@ -1,13 +1,14 @@
+import { copyFile } from "fs/promises";
+import {
+  REGISTER_SUCCESS_MSG,
+  REGISTER_SCRIPT,
+  DOWNLOAD_SCRIPT,
+  ORIGINAL_FP_PATH,
+  SCAN_SUCCESS_MSG,
+  SCAN_SCRIPT,
+  DELETE_SCRIPT,
+} from "../constants";
 import { ExecutionService } from "./ExecutionService";
-
-const SCRIPT_PATH = "/usr/share/doc/python3-fingerprint/examples";
-
-const REGISTER_SCRIPT = `${SCRIPT_PATH}/example_enroll.py`;
-const DOWNLOAD_SCRIPT = `${SCRIPT_PATH}/example_downloadimage.py`;
-const DELETE_SCRIPT = `${SCRIPT_PATH}/example_delete_all.py`;
-const SCAN_SCRIPT = `${SCRIPT_PATH}/example_search.py`;
-const REGISTER_SUCCESS_MSG = "enrolled successfully";
-const SCAN_SUCCESS_MSG = "Found template at position";
 
 export class FingerprintService {
   static async register() {
@@ -49,10 +50,7 @@ export class FingerprintService {
           },
         });
 
-        // move and rename to position
-        // const filePath = "/tmp/fingerprint.bmp";
-        // await copyFile(filePath, `/tmp/${scanData}.bmp`);
-
+        await copyFile(ORIGINAL_FP_PATH, `${__dirname}/../../data/data.bmp`);
         console.log("scanData is", scanData);
       } catch {}
     }

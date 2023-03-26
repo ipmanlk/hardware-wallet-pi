@@ -8,4 +8,13 @@ export class CommonUtil {
     hash.update(image);
     return hash.digest("hex");
   }
+
+  static getRandomString(length: number = 10) {
+    const chars =
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let result = "";
+    for (let i = length; i > 0; --i)
+      result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
+  }
 }

@@ -6,12 +6,14 @@ export type CreateUserData = {
 
 export type DBUser = CreateUserData & { id: number; createdAt: Date };
 
-export type CreateCredentialData = {
+export type CredentialData = {
   domain: string;
   name: string;
   username: string;
   password: string;
 };
+
+export type CreateCredentialData = CredentialData & {};
 
 export type DBCredential = CreateCredentialData & {
   id: number;
