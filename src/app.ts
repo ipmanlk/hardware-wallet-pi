@@ -7,7 +7,6 @@ import https from "https";
 import fs from "fs";
 import { CERT_DIR } from "./constants";
 import { DeviceController } from "./controller/device.controller";
-import { BackupController } from "./controller/backup.controller";
 
 const PORT = 3000;
 const privateKey = fs.readFileSync(`${CERT_DIR}/key.pem`, "utf8");
@@ -57,10 +56,10 @@ app.get("/device/status", (req, res) =>
   DeviceController.getDeviceStatus(req, res)
 );
 
-app.get("/device/backup", (req, res) => BackupController.getBackup(req, res));
+app.get("/device/backup", (req, res) => DeviceController.getBackup(req, res));
 
 app.post("/device/restore", (req, res) =>
-  BackupController.restoreBackup(req, res)
+  DeviceController.restoreBackup(req, res)
 );
 
 app.delete("/device/reset", (req, res) => {
