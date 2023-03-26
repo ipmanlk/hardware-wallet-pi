@@ -92,6 +92,11 @@ export class DatabaseService {
     return stmt.get(domain);
   }
 
+  static async getCredentialById(id: number): Promise<DBCredential> {
+    const stmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
+    return stmt.get(id);
+  }
+
   static deleteCredentialById(id: number): DBCredential {
     const stmt = this.db.prepare("DELETE FROM Credential WHERE id = ?");
     return stmt.get(id);

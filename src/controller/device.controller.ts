@@ -5,6 +5,16 @@ import { DatabaseService } from "../service/DatabaseService";
 import { FingerprintService } from "../service/FingerprintService";
 
 export class DeviceController {
+  static async getDeviceStatus(req: Request, res: Response) {
+    const dbUser = await DatabaseService.getFirstUser();
+
+    return res.json({
+      data: {
+        registered: !!dbUser,
+      },
+    });
+  }
+
   static async resetDevice(req: Request, res: Response) {
     try {
       await DatabaseService.resetDb();

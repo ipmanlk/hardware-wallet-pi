@@ -7,16 +7,6 @@ import { InitialRegistrationData } from "../types";
 import { CommonUtil } from "../util/CommonUtil";
 
 export class AuthController {
-  static async getDeviceStatus(req: Request, res: Response) {
-    const dbUser = await DatabaseService.getFirstUser();
-
-    return res.json({
-      data: {
-        registered: !!dbUser,
-      },
-    });
-  }
-
   static async register(req: Request, res: Response) {
     const existingUser = await DatabaseService.getFirstUser();
 

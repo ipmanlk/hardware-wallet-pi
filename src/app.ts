@@ -49,8 +49,12 @@ app.delete("/credentials/:id", (req, res) =>
   CredentialsController.deleteCredential(req, res)
 );
 
+app.get("/credentials/:id", (req, res) =>
+  CredentialsController.getCredentialById(req, res)
+);
+
 app.get("/device/status", (req, res) =>
-  AuthController.getDeviceStatus(req, res)
+  DeviceController.getDeviceStatus(req, res)
 );
 
 app.get("/device/backup", (req, res) => BackupController.getBackup(req, res));
