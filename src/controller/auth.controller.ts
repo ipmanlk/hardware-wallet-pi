@@ -37,7 +37,7 @@ export class AuthController {
     const walletKey = backupKey.slice(0, 5);
     const clientKey = backupKey.slice(5);
 
-    await writeFile(WALLET_BACKUP_KEY_PATH, walletKey);
+    await writeFile(WALLET_BACKUP_KEY_PATH, walletKey, "utf-8");
 
     return res.json({
       data: {

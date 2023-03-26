@@ -1,5 +1,6 @@
 import { resolve } from "path";
 
+export const DB_PATH = resolve(`${__dirname}/../data/data.db`);
 export const CERT_DIR = resolve(`${__dirname}/../certs`);
 export const ORIGINAL_FP_PATH = "/tmp/fingerprint.bmp";
 export const FP_PATH = resolve(`${__dirname}/../data/data.bmp`);

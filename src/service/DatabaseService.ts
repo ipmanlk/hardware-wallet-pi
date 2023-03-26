@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import { unlink } from "fs/promises";
 import { resolve } from "path";
+import { DB_PATH } from "../constants";
 import {
   CreateCredentialData,
   CreateCredentialUsageData,
@@ -17,8 +18,6 @@ export type User = {};
 export type Device = {
   id: number;
 };
-
-const DB_PATH = resolve(`${__dirname}/../../data/data.db`);
 
 export class DatabaseService {
   private static db = new Database(DB_PATH);
@@ -127,5 +126,9 @@ export class DatabaseService {
     await unlink(DB_PATH);
     this.db = new Database(DB_PATH);
     await this.initializeDb();
+  }
+
+  static reloadDb() {
+    this.db = new Database(DB_PATH);
   }
 }
