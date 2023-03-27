@@ -97,9 +97,9 @@ export class DatabaseService {
     return stmt.get(id);
   }
 
-  static deleteCredentialById(id: number): DBCredential {
+  static deleteCredentialById(id: number) {
     const stmt = this.db.prepare("DELETE FROM Credential WHERE id = ?");
-    return stmt.get(id);
+    stmt.run(id);
   }
 
   static async createCredentialUsage(

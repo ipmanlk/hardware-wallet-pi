@@ -54,8 +54,7 @@ export class DeviceController {
   static async restoreBackup(req: Request, res: Response) {
     try {
       const data = req.body.data;
-      const key = await this.getKey();
-      const decryptedData = EncryptionUtil.decrypt(key, data);
+      const decryptedData = EncryptionUtil.decrypt(req.body.walletKey, data);
       const buffer = Buffer.from(decryptedData, "base64");
 
       await writeFile(DB_PATH, buffer);

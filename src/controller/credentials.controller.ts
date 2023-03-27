@@ -20,7 +20,9 @@ export class CredentialsController {
     let decryptedCredentials;
 
     if (dbCredential) {
-      decryptedCredentials = CredentialUtil.decryptCredential(dbCredential);
+      decryptedCredentials = await CredentialUtil.decryptCredential(
+        dbCredential
+      );
     }
 
     return res.json({ found: !!dbCredential, data: decryptedCredentials });
@@ -33,7 +35,9 @@ export class CredentialsController {
     let decryptedCredential;
 
     if (dbCredential) {
-      decryptedCredential = CredentialUtil.decryptCredential(dbCredential);
+      decryptedCredential = await CredentialUtil.decryptCredential(
+        dbCredential
+      );
     }
 
     return res.json({ found: !!dbCredential, data: decryptedCredential });
@@ -43,13 +47,15 @@ export class CredentialsController {
     const dbCredentials = await DatabaseService.getCredentials();
 
     return res.json({
-      data: dbCredentials.map((c) => {
-        const decryptedCredential = CredentialUtil.decryptCredential(c);
-        return {
-          ...decryptedCredential,
-          password: "********",
-        };
-      }),
+      data: await Promise.all(
+        dbCredentials.map(async (c) => {
+          const decryptedCredential = await CredentialUtil.decryptCredential(c);
+          return {
+            ...decryptedCredential,
+            password: "********",
+          };
+        })
+      ),
     });
   }
 
