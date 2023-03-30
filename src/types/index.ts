@@ -13,12 +13,16 @@ export type CredentialData = {
   password: string;
 };
 
-export type CreateCredentialData = CredentialData & {};
+export type CreateCredentialData = CredentialData & {
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 export type DBCredential = CreateCredentialData & {
   id: number;
   createdAt: string;
   updatedAt: string;
+  status: string;
 };
 
 export type CreateDeviceData = {

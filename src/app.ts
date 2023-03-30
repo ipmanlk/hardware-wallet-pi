@@ -48,6 +48,10 @@ app.delete("/credentials/:id", (req, res) =>
   CredentialsController.deleteCredential(req, res)
 );
 
+app.patch("/credentials/:id", (req, res) =>
+  CredentialsController.patchCredential(req, res)
+);
+
 app.get("/credentials/:id", (req, res) =>
   CredentialsController.getCredentialById(req, res)
 );

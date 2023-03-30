@@ -7,6 +7,7 @@ import {
   CreateCredentialUsageData,
   CreateDeviceData,
   CreateUserData,
+  CredentialData,
   DBCredential,
   DBCredentialUsage,
   DBDevice,
@@ -68,9 +69,9 @@ export class DatabaseService {
       "INSERT INTO Credential(domain, name, username, password, createdAt, updatedAt) VALUES(@domain, @name, @username, @password, @createdAt, @updatedAt)"
     );
     const info = stmt.run({
-      ...data,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      ...data,
     });
 
     const selectStmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
@@ -84,17 +85,35 @@ export class DatabaseService {
 
   static async getCredentials(): Promise<DBCredential[]> {
     const stmt = this.db.prepare("SELECT * FROM Credential");
-    return stmt.all();
+    return stmt.all()?.map((record) => ({
+      ...record,
+      status: this.getStatus(record),
+    }));
   }
 
   static async getCredentialsByDomain(domain: string): Promise<DBCredential> {
     const stmt = this.db.prepare("SELECT * FROM Credential WHERE domain = ?");
-    return stmt.get(domain);
+    const record = stmt.get(domain);
+
+    if (record) {
+      return {
+        ...record,
+        status: this.getStatus(record),
+      };
+    }
+    return record;
   }
 
   static async getCredentialById(id: number): Promise<DBCredential> {
     const stmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
-    return stmt.get(id);
+    const record = stmt.get(id);
+    if (record) {
+      return {
+        ...record,
+        status: this.getStatus(record),
+      };
+    }
+    return record;
   }
 
   static deleteCredentialById(id: number) {
@@ -135,6 +154,16 @@ export class DatabaseService {
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS CredentialUsage(id INTEGER PRIMARY KEY AUTOINCREMENT, deviceId INTEGER, credentialId INTEGER, usedAt TEXT)"
     );
+  }
+
+  private static getStatus(credential: DBCredential) {
+    const updatedAt = new Date(credential.updatedAt);
+
+    if (updatedAt.getTime() < Date.now() - 1000 * 60 * 60 * 24 * 30 * 3) {
+      return "expired";
+    }
+
+    return "active";
   }
 
   static async resetDb() {

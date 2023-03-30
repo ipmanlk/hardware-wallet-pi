@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { DatabaseService } from "../service/DatabaseService";
-import { CreateCredentialData } from "../types";
+import { CreateCredentialData, DBCredential } from "../types";
 import { CredentialUtil } from "../util/CredentialUtil";
 
 export class CredentialsController {
@@ -63,5 +63,36 @@ export class CredentialsController {
     const id = +req.params.id;
     await DatabaseService.deleteCredentialById(id);
     return res.json({ message: "Credential deleted" });
+  }
+
+  static async patchCredential(req: Request, res: Response) {
+    const id = +req.params.id;
+    const dbCredential = (await DatabaseService.getCredentialById(
+      id
+    )) as CreateCredentialData;
+
+    await DatabaseService.deleteCredentialById(id);
+
+    const decryptedCredential = await CredentialUtil.decryptCredential(
+      dbCredential
+    );
+
+    //@ts-ignore
+    delete dbCredential.id;
+
+    const encryptedData = await CredentialUtil.encryptCredential(
+      decryptedCredential
+    );
+
+    const fourMonthsAgo = new Date();
+    fourMonthsAgo.setMonth(fourMonthsAgo.getMonth() - 4);
+
+    const newDbCredential = await DatabaseService.createCredential({
+      ...encryptedData,
+      createdAt: fourMonthsAgo.toISOString(),
+      updatedAt: fourMonthsAgo.toISOString(),
+    });
+
+    return res.json({ data: newDbCredential });
   }
 }
