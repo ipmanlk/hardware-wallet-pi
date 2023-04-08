@@ -4,6 +4,8 @@ import { DB_PATH, FP_PATH, WALLET_BACKUP_KEY_PATH } from "../constants";
 import { DatabaseService } from "../service/DatabaseService";
 import { FingerprintService } from "../service/FingerprintService";
 import { EncryptionUtil } from "../util/EncryptionUtil";
+import { CredentialUtil } from "../util/CredentialUtil";
+import { DBCredential } from "../types";
 
 export class DeviceController {
   static async getDeviceStatus(req: Request, res: Response) {
@@ -31,12 +33,22 @@ export class DeviceController {
 
   static async getBackup(req: Request, res: Response) {
     try {
-      const dbData = await readFile(DB_PATH);
+      const credentials = await DatabaseService.getCredentials();
+
+      const decryptedCredentials = await Promise.all(
+        credentials.map(async (c) => {
+          const decryptedCredential = await CredentialUtil.decryptCredential(c);
+          return {
+            ...decryptedCredential,
+          };
+        })
+      );
+
       const key = await this.getKey();
 
       const encryptedData = EncryptionUtil.encrypt(
         key,
-        dbData.toString("base64")
+        JSON.stringify(decryptedCredentials)
       );
 
       return res.json({
@@ -55,11 +67,14 @@ export class DeviceController {
     try {
       const data = req.body.data;
       const decryptedData = EncryptionUtil.decrypt(req.body.walletKey, data);
-      const buffer = Buffer.from(decryptedData, "base64");
+      const parsedData = JSON.parse(decryptedData) as DBCredential[];
 
-      await writeFile(DB_PATH, buffer);
-
-      DatabaseService.reloadDb();
+      for (const credential of parsedData) {
+        const encryptedData = await CredentialUtil.encryptCredential(
+          credential
+        );
+        await DatabaseService.createCredential(encryptedData);
+      }
 
       return res.json({
         message: "Backup restored",

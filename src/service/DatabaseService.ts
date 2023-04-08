@@ -1,13 +1,11 @@
 import Database from "better-sqlite3";
 import { unlink } from "fs/promises";
-import { resolve } from "path";
 import { DB_PATH } from "../constants";
 import {
   CreateCredentialData,
   CreateCredentialUsageData,
   CreateDeviceData,
   CreateUserData,
-  CredentialData,
   DBCredential,
   DBCredentialUsage,
   DBDevice,
