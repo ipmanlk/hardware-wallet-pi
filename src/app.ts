@@ -40,7 +40,7 @@ app.get("/credentials", (req, res) =>
   CredentialsController.getCredentials(req, res)
 );
 
-app.get("/credential-by-domain", (req, res) =>
+app.post("/credential-by-domain", (req, res) =>
   CredentialsController.getCredentialByDomain(req, res)
 );
 
@@ -52,7 +52,7 @@ app.patch("/credentials/:id", (req, res) =>
   CredentialsController.patchCredential(req, res)
 );
 
-app.get("/credentials/:id", (req, res) =>
+app.post("/credentials/:id", (req, res) =>
   CredentialsController.getCredentialById(req, res)
 );
 

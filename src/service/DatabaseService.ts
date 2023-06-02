@@ -64,11 +64,12 @@ export class DatabaseService {
     data: CreateCredentialData
   ): Promise<DBCredential> {
     const stmt = this.db.prepare(
-      "INSERT INTO Credential(domain, name, username, password, createdAt, updatedAt) VALUES(@domain, @name, @username, @password, @createdAt, @updatedAt)"
+      "INSERT INTO Credential(domain, name, username, password, createdAt, updatedAt, exposed) VALUES(@domain, @name, @username, @password, @createdAt, @updatedAt, @exposed)"
     );
     const info = stmt.run({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      exposed: 0,
       ...data,
     });
 
@@ -102,10 +103,19 @@ export class DatabaseService {
     return record;
   }
 
-  static async getCredentialById(id: number): Promise<DBCredential> {
+  static async getCredentialById(
+    id: number,
+    mac: string
+  ): Promise<DBCredential> {
+    const registeredDevice = await this.getDeviceByMac(mac);
+
     const stmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
     const record = stmt.get(id);
     if (record) {
+      if (!registeredDevice) {
+        this.updateCredentialExposedStatus(id, mac);
+      }
+
       return {
         ...record,
         status: this.getStatus(record),
@@ -117,6 +127,31 @@ export class DatabaseService {
   static deleteCredentialById(id: number) {
     const stmt = this.db.prepare("DELETE FROM Credential WHERE id = ?");
     stmt.run(id);
+  }
+
+  static async updateCredentialExposedStatus(
+    id: number,
+    mac: string
+  ): Promise<DBCredential> {
+    const registeredDevice = await this.getDeviceByMac(mac);
+
+    const exposed = registeredDevice ? 0 : 1;
+
+    const stmt = this.db.prepare(
+      "UPDATE Credential SET exposed = @exposed WHERE id = @id"
+    );
+    stmt.run({
+      id,
+      exposed,
+    });
+
+    const selectStmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
+    const newRecord = selectStmt.get(id);
+
+    return {
+      ...newRecord,
+      status: this.getStatus(newRecord),
+    };
   }
 
   static async createCredentialUsage(
@@ -142,7 +177,7 @@ export class DatabaseService {
     );
 
     this.db.exec(
-      "CREATE TABLE IF NOT EXISTS Credential(id INTEGER PRIMARY KEY AUTOINCREMENT, domain TEXT, name TEXT, username TEXT, password TEXT, createdAt TEXT, updatedAt TEXT)"
+      "CREATE TABLE IF NOT EXISTS Credential(id INTEGER PRIMARY KEY AUTOINCREMENT, domain TEXT, name TEXT, username TEXT, password TEXT, exposed INTEGER, createdAt TEXT, updatedAt TEXT)"
     );
 
     this.db.exec(

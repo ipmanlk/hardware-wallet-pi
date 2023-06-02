@@ -23,6 +23,11 @@ export class CredentialsController {
       decryptedCredentials = await CredentialUtil.decryptCredential(
         dbCredential
       );
+
+      await DatabaseService.updateCredentialExposedStatus(
+        dbCredential.id,
+        req.body.mac
+      );
     }
 
     return res.json({ found: !!dbCredential, data: decryptedCredentials });
@@ -30,7 +35,10 @@ export class CredentialsController {
 
   static async getCredentialById(req: Request, res: Response) {
     const id = +req.params.id;
-    const dbCredential = await DatabaseService.getCredentialById(id);
+    const dbCredential = await DatabaseService.getCredentialById(
+      id,
+      req.body.mac
+    );
 
     let decryptedCredential;
 
@@ -68,7 +76,8 @@ export class CredentialsController {
   static async patchCredential(req: Request, res: Response) {
     const id = +req.params.id;
     const dbCredential = (await DatabaseService.getCredentialById(
-      id
+      id,
+      req.body.mac
     )) as CreateCredentialData;
 
     await DatabaseService.deleteCredentialById(id);
