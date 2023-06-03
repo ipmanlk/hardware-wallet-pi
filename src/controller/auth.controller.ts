@@ -23,6 +23,13 @@ export class AuthController {
     const data = req.body as InitialRegistrationData;
     const dbUser = await DatabaseService.createUser(data.user);
 
+    await DatabaseService.createdDeviceMac(
+      {
+        mac: data.device.mac,
+        trusted: 1
+      }
+    )
+
     const backupKey = CommonUtil.getRandomString();
     const walletKey = backupKey.slice(0, 5);
     const clientKey = backupKey.slice(5);

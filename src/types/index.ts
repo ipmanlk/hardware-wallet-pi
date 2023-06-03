@@ -50,3 +50,13 @@ export type InitialRegistrationData = {
   user: CreateUserData;
   device: CreateDeviceData;
 };
+
+export type CreateDeviceMacData = {
+  mac: string;
+  trusted: number;
+}
+
+export type DbTrustedDeviceData = CreateDeviceMacData & {
+  id: number;
+  createdAt: string;
+}

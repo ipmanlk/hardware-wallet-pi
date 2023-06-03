@@ -5,6 +5,7 @@ import {
   CreateCredentialData,
   CreateCredentialUsageData,
   CreateDeviceData,
+  CreateDeviceMacData,
   CreateUserData,
   DBCredential,
   DBCredentialUsage,
@@ -133,9 +134,11 @@ export class DatabaseService {
     id: number,
     mac: string
   ): Promise<DBCredential> {
-    const registeredDevice = await this.getDeviceByMac(mac);
 
-    const exposed = registeredDevice ? 0 : 1;
+    const trustedStmt = this.db.prepare("SELECT * FROM DeviceMac WHERE mac = ? AND trusted = ?");
+    const trustedDevice = trustedStmt.get(mac, 1);
+
+    const exposed = trustedDevice ? 0 : 1;
 
     const stmt = this.db.prepare(
       "UPDATE Credential SET exposed = @exposed WHERE id = @id"
@@ -144,6 +147,14 @@ export class DatabaseService {
       id,
       exposed,
     });
+
+    if (exposed) {
+      await this.createdDeviceMac({
+        mac: mac,
+        trusted: 0,
+      })
+    }
+
 
     const selectStmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
     const newRecord = selectStmt.get(id);
@@ -171,6 +182,49 @@ export class DatabaseService {
     return selectStmt.get(info.lastInsertRowid);
   }
 
+  static async createdDeviceMac(data: CreateDeviceMacData) {
+    const stmt = this.db.prepare(
+      "INSERT INTO DeviceMac(mac, trusted, createdAt) VALUES(@mac, @trusted, @createdAt)"
+    );
+    const info = stmt.run({
+      ...data,
+      createdAt: new Date().toISOString(),
+    });
+
+    const selectStmt = this.db.prepare(
+      "SELECT * FROM DeviceMac WHERE id = ?"
+    );
+
+    return selectStmt.get(info.lastInsertRowid);
+  }
+
+  static async updateDeviceMac(id: number, data: CreateDeviceMacData) {
+    const stmt = this.db.prepare(
+      "UPDATE DeviceMac SET trusted = @trusted WHERE id = @id"
+    );
+    const info = stmt.run({
+      ...data,
+      createdAt: new Date().toISOString(),
+    });
+
+
+    const updateStmt = this.db.prepare("UPDATE Credential SET exposed = @exposed")
+    updateStmt.run({
+      exposed: 0
+    });
+
+    const selectStmt = this.db.prepare(
+      "SELECT * FROM DeviceMac WHERE id = ?"
+    );
+
+    return selectStmt.get(info.lastInsertRowid);
+  }
+
+  static async getDeviceMacs() {
+    const stmt = this.db.prepare("SELECT * FROM DeviceMac");
+    return stmt.all();
+  }
+
   static async initializeDb() {
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS User(id INTEGER PRIMARY KEY AUTOINCREMENT, firstName TEXT, lastName TEXT, backupMac TEXT DEFAULT NULL, createdAt TEXT)"
@@ -186,6 +240,10 @@ export class DatabaseService {
 
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS CredentialUsage(id INTEGER PRIMARY KEY AUTOINCREMENT, deviceId INTEGER, credentialId INTEGER, usedAt TEXT)"
+    );
+
+    this.db.exec(
+      "CREATE TABLE IF NOT EXISTS DeviceMac(id INTEGER PRIMARY KEY AUTOINCREMENT, mac TEXT, trusted INTEGER, createdAt TEXT)"
     );
   }
 
