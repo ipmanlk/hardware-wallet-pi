@@ -52,6 +52,10 @@ app.patch("/credentials/:id", (req, res) =>
   CredentialsController.patchCredential(req, res)
 );
 
+app.put("/credentials", (req, res) =>
+  CredentialsController.updateCredential(req, res)
+);
+
 app.post("/credentials/:id", (req, res) =>
   CredentialsController.getCredentialById(req, res)
 );
