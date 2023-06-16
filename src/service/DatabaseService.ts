@@ -108,15 +108,10 @@ export class DatabaseService {
     id: number,
     mac: string
   ): Promise<DBCredential> {
-    const registeredDevice = await this.getDeviceByMac(mac);
-
     const stmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
     const record = stmt.get(id);
     if (record) {
-      if (!registeredDevice) {
-        this.updateCredentialExposedStatus(id, mac);
-      }
-
+      this.updateCredentialExposedStatus(id, mac);
       return {
         ...record,
         status: this.getStatus(record),
@@ -134,27 +129,16 @@ export class DatabaseService {
     id: number,
     mac: string
   ): Promise<DBCredential> {
-
-    const trustedStmt = this.db.prepare("SELECT * FROM DeviceMac WHERE mac = ? AND trusted = ?");
-    const trustedDevice = trustedStmt.get(mac, 1);
-
-    const exposed = trustedDevice ? 0 : 1;
+    const exposed = mac == "exposed";
 
     const stmt = this.db.prepare(
       "UPDATE Credential SET exposed = @exposed WHERE id = @id"
     );
+
     stmt.run({
       id,
-      exposed,
+      exposed: exposed === false ? 0 : 1,
     });
-
-    if (exposed) {
-      await this.createdDeviceMac({
-        mac: mac,
-        trusted: 0,
-      })
-    }
-
 
     const selectStmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
     const newRecord = selectStmt.get(id);
@@ -191,9 +175,7 @@ export class DatabaseService {
       createdAt: new Date().toISOString(),
     });
 
-    const selectStmt = this.db.prepare(
-      "SELECT * FROM DeviceMac WHERE id = ?"
-    );
+    const selectStmt = this.db.prepare("SELECT * FROM DeviceMac WHERE id = ?");
 
     return selectStmt.get(info.lastInsertRowid);
   }
@@ -207,15 +189,14 @@ export class DatabaseService {
       createdAt: new Date().toISOString(),
     });
 
-
-    const updateStmt = this.db.prepare("UPDATE Credential SET exposed = @exposed")
+    const updateStmt = this.db.prepare(
+      "UPDATE Credential SET exposed = @exposed"
+    );
     updateStmt.run({
-      exposed: 0
+      exposed: 0,
     });
 
-    const selectStmt = this.db.prepare(
-      "SELECT * FROM DeviceMac WHERE id = ?"
-    );
+    const selectStmt = this.db.prepare("SELECT * FROM DeviceMac WHERE id = ?");
 
     return selectStmt.get(info.lastInsertRowid);
   }

@@ -23,11 +23,6 @@ export class CredentialsController {
       decryptedCredentials = await CredentialUtil.decryptCredential(
         dbCredential
       );
-
-      await DatabaseService.updateCredentialExposedStatus(
-        dbCredential.id,
-        req.body.mac
-      );
     }
 
     return res.json({ found: !!dbCredential, data: decryptedCredentials });
