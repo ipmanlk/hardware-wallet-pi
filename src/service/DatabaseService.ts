@@ -83,6 +83,30 @@ export class DatabaseService {
     };
   }
 
+  static async updateCredential(id: number, data: CreateCredentialData) {
+    const stmt = this.db.prepare(
+      "UPDATE Credential SET domain = ?, name = ?, username = ?, password = ?, updatedAt = ?, exposed = ? WHERE id = ?"
+    );
+    stmt.run(
+      data.domain,
+      data.name,
+      data.username,
+      data.password,
+      new Date().toISOString(),
+      //@ts-ignore
+      data.exposed,
+      id
+    );
+
+    const selectStmt = this.db.prepare("SELECT * FROM Credential WHERE id = ?");
+    const newRecord = selectStmt.get(id);
+
+    return {
+      ...newRecord,
+      password: "********",
+    };
+  }
+
   static async getCredentials(): Promise<DBCredential[]> {
     const stmt = this.db.prepare("SELECT * FROM Credential");
     return stmt.all()?.map((record) => ({

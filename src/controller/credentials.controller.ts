@@ -105,26 +105,25 @@ export class CredentialsController {
       req.body.domain
     )) as CreateCredentialData;
 
-    //@ts-ignore
-    await DatabaseService.deleteCredentialById(dbCredential.id);
-
     const decryptedCredential = await CredentialUtil.decryptCredential(
       dbCredential
     );
-
-    //@ts-ignore
-    delete dbCredential.id;
 
     const encryptedData = await CredentialUtil.encryptCredential({
       ...decryptedCredential,
       password: req.body.password,
     });
 
-    const newDbCredential = await DatabaseService.createCredential({
-      ...encryptedData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    const newDbCredential = await DatabaseService.updateCredential(
+      //@ts-ignore
+      dbCredential.id,
+      {
+        ...dbCredential,
+        ...encryptedData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    );
 
     return res.json({ data: newDbCredential });
   }
